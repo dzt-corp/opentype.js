@@ -36,7 +36,7 @@ import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontData, getOs2Table, uncompressTable } from './fn/index.mjs';
+import { getFontData, parseOS2Table, uncompressTable } from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -157,7 +157,8 @@ function parseBuffer(buffer, opt = {}) {
                 nameTableEntry = tableEntry;
                 break;
             case 'OS/2':
-                font.tables.os2 = getOs2Table(data, tableEntry);
+                font.tables.os2 = parseOS2Table(table.data, table.offset);
+                table = uncompressTable(data, tableEntry);
                 break;
             case 'post':
                 table = uncompressTable(data, tableEntry);
