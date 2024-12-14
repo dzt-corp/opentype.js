@@ -67,7 +67,7 @@ interface NameTable {
   [key: Platform]: Record<string, Record<string, string>>
 }
 
-interface FVarAxis {
+interface FvarAxis {
   tag: string;
   minValue: number;
   defaultValue: number;
@@ -76,7 +76,7 @@ interface FVarAxis {
   name: Record<string, string>
 }
 
-interface FVarInstance {
+interface FvarInstance {
   subfamilyNameID: number;
   name: Record<string, string>
   coordinates: Record<string, number>
@@ -84,9 +84,9 @@ interface FVarInstance {
   postScriptName: Record<string, string>
 }
 
-interface FVarTable {
-  axes: FVarAxis[];
-  instances: FVarInstance[];
+interface FvarTable {
+  axes: FvarAxis[];
+  instances: FvarInstance[];
 }
 
 export function uncompressTable(
@@ -96,6 +96,6 @@ export function uncompressTable(
 
 export function getFontFileData(buffer: ArrayBuffer): FontFileData;
 export function parseOS2Table(data: DataView, offset: number): OS2Table;
+export function parseLtagTable(data: DataView, offset: number): string[];
 export function parseNameTable(data: DataView, offset: number, ltag: string[]): NameTable;
-export function parseFvarTable(data: DataView, offset: number, names: NameTable): FVarTable;
-// todo ltag table
+export function parseFvarTable(data: DataView, offset: number, names: NameTable): FvarTable;

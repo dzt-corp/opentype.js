@@ -26,7 +26,6 @@ import head from './tables/head.mjs';
 import hhea from './tables/hhea.mjs';
 import hmtx from './tables/hmtx.mjs';
 import kern from './tables/kern.mjs';
-import ltag from './tables/ltag.mjs';
 import loca from './tables/loca.mjs';
 import maxp from './tables/maxp.mjs';
 import post from './tables/post.mjs';
@@ -34,7 +33,14 @@ import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontFileData, parseOS2Table, uncompressTable, parseNameTable, parseFvarTable } from './fn/index.mjs';
+import {
+    getFontFileData,
+    parseOS2Table,
+    uncompressTable,
+    parseNameTable,
+    parseFvarTable,
+    parseLtagTable
+} from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -136,7 +142,7 @@ function parseBuffer(buffer, opt = {}) {
                 break;
             case 'ltag':
                 table = uncompressTable(data, tableEntry);
-                ltagTable = ltag.parse(table.data, table.offset);
+                ltagTable = parseLtagTable(table.data, table.offset);
                 break;
             case 'COLR':
                 table = uncompressTable(data, tableEntry);
