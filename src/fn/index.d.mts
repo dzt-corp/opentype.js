@@ -12,6 +12,11 @@ interface TableEntry {
   compression: boolean;
 }
 
+interface TableData {
+  data: DataView;
+  offset: number;
+}
+
 interface OS2Table {
   version: number;
   xAvgCharWidth: number;
@@ -53,4 +58,8 @@ interface OS2Table {
 }
 
 export function getFontFileData(buffer: ArrayBuffer): FontFileData;
-export function getOs2Table(data: DataView, tableEntry: TableEntry): OS2Table;
+export function parseOS2Table(data: DataView, offset: number): OS2Table;
+export function uncompressTable(
+  data: DataView,
+  tableEntry: TableEntry
+): TableData;

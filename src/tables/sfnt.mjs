@@ -15,7 +15,6 @@ import hmtx from './hmtx.mjs';
 import ltag from './ltag.mjs';
 import maxp from './maxp.mjs';
 import _name from './name.mjs';
-import os2 from './os2.mjs';
 import post from './post.mjs';
 import gsub from './gsub.mjs';
 import meta from './meta.mjs';
@@ -28,6 +27,7 @@ import cvar from './cvar.mjs';
 import gvar from './gvar.mjs';
 import gasp from './gasp.mjs';
 import svg from './svg.mjs';
+import { getUnicodeRange, makeOS2Table } from '../fn/index.mts';
 
 function log2(v) {
     return Math.log(v) / Math.log(2) | 0;
@@ -172,7 +172,7 @@ function fontToSfntTable(font) {
             lastCharIndex = unicode;
         }
 
-        const position = os2.getUnicodeRange(unicode);
+        const position = getUnicodeRange(unicode);
         if (position < 32) {
             ulUnicodeRange1 |= 1 << position;
         } else if (position < 64) {
@@ -243,7 +243,7 @@ function fontToSfntTable(font) {
 
     const maxpTable = maxp.make(font.glyphs.length);
 
-    const os2Table = os2.make(Object.assign({
+    const os2Table = makeOS2Table(Object.assign({
         xAvgCharWidth: Math.round(globals.advanceWidthAvg),
         usFirstCharIndex: firstCharIndex,
         usLastCharIndex: lastCharIndex,
