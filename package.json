@@ -1,6 +1,6 @@
 {
-  "name": "opentype.js",
-  "description": "OpenType font parser",
+  "name": "@paper-design/opentype.js",
+  "description": "A fork of opentype.js with tree-shakeable entry points.",
   "author": {
     "name": "Frederik De Bleser",
     "email": "frederik@debleser.be"
@@ -18,11 +18,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/opentypejs/opentype.js.git"
+    "url": "git@github.com:paper-design/opentype.js.git"
   },
-  "main": "./dist/opentype.js",
-  "browser": "./dist/opentype.js",
-  "module": "./dist/opentype.mjs",
+  "main": "./src/opentype.mjs",
+  "browser": "./src/opentype.mjs",
+  "module": "./src/opentype.mjs",
+  "types": "./src/index.d.mts",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./fn": "./src/fn/index.mjs"
+  },
   "scripts": {
     "build": "npm run b:umd && npm run b:esm",
     "dist": " npm run d:umd && npm run d:esm",
@@ -44,7 +49,7 @@
     "ot": "./bin/ot"
   },
   "files": [
-    "dist"
+    "src"
   ],
   "sideEffects": false
 }
