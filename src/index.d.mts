@@ -445,3 +445,5 @@ export function loadSync(
 ): Font;
 
 export function parse(buffer: any): Font;
+
+export default { parse };

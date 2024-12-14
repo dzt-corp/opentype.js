@@ -14,7 +14,6 @@ import colr from './tables/colr.mjs';
 import cmap from './tables/cmap.mjs';
 import cff from './tables/cff.mjs';
 import stat from './tables/stat.mjs';
-import fvar from './tables/fvar.mjs';
 import gvar from './tables/gvar.mjs';
 import cvar from './tables/cvar.mjs';
 import avar from './tables/avar.mjs';
@@ -27,16 +26,21 @@ import head from './tables/head.mjs';
 import hhea from './tables/hhea.mjs';
 import hmtx from './tables/hmtx.mjs';
 import kern from './tables/kern.mjs';
-import ltag from './tables/ltag.mjs';
 import loca from './tables/loca.mjs';
 import maxp from './tables/maxp.mjs';
-import _name from './tables/name.mjs';
 import post from './tables/post.mjs';
 import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontData, parseOS2Table, uncompressTable } from './fn/index.mjs';
+import {
+    getFontFileData,
+    parseOS2Table,
+    uncompressTable,
+    parseNameTable,
+    parseFvarTable,
+    parseLtagTable
+} from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -60,7 +64,7 @@ function parseBuffer(buffer, opt = {}) {
     // should be an empty font that we'll fill with our own data.
     const font = new Font({ empty: true });
 
-    const { data, outlinesFormat, tableEntries } = getFontData(buffer);
+    const { data, outlinesFormat, tableEntries } = getFontFileData(buffer);
     const numTables = tableEntries.length;
     font.outlinesFormat = outlinesFormat;
 
@@ -138,7 +142,7 @@ function parseBuffer(buffer, opt = {}) {
                 break;
             case 'ltag':
                 table = uncompressTable(data, tableEntry);
-                ltagTable = ltag.parse(table.data, table.offset);
+                ltagTable = parseLtagTable(table.data, table.offset);
                 break;
             case 'COLR':
                 table = uncompressTable(data, tableEntry);
@@ -157,8 +161,8 @@ function parseBuffer(buffer, opt = {}) {
                 nameTableEntry = tableEntry;
                 break;
             case 'OS/2':
-                font.tables.os2 = parseOS2Table(table.data, table.offset);
                 table = uncompressTable(data, tableEntry);
+                font.tables.os2 = parseOS2Table(table.data, table.offset);
                 break;
             case 'post':
                 table = uncompressTable(data, tableEntry);
@@ -217,7 +221,7 @@ function parseBuffer(buffer, opt = {}) {
     }
 
     const nameTable = uncompressTable(data, nameTableEntry);
-    font.tables.name = _name.parse(nameTable.data, nameTable.offset, ltagTable);
+    font.tables.name = parseNameTable(nameTable.data, nameTable.offset, ltagTable);
     font.names = font.tables.name;
 
     if (glyfTableEntry && locaTableEntry) {
@@ -265,7 +269,7 @@ function parseBuffer(buffer, opt = {}) {
 
     if (fvarTableEntry) {
         const fvarTable = uncompressTable(data, fvarTableEntry);
-        font.tables.fvar = fvar.parse(fvarTable.data, fvarTable.offset, font.names);
+        font.tables.fvar = parseFvarTable(fvarTable.data, fvarTable.offset, font.names);
     }
 
     if (statTableEntry) {
