@@ -30,13 +30,12 @@ import kern from './tables/kern.mjs';
 import ltag from './tables/ltag.mjs';
 import loca from './tables/loca.mjs';
 import maxp from './tables/maxp.mjs';
-import _name from './tables/name.mjs';
 import post from './tables/post.mjs';
 import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontFileData, parseOS2Table, uncompressTable } from './fn/index.mjs';
+import { getFontFileData, parseOS2Table, uncompressTable, parseNameTable } from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -217,7 +216,7 @@ function parseBuffer(buffer, opt = {}) {
     }
 
     const nameTable = uncompressTable(data, nameTableEntry);
-    font.tables.name = _name.parse(nameTable.data, nameTable.offset, ltagTable);
+    font.tables.name = parseNameTable(nameTable.data, nameTable.offset, ltagTable);
     font.names = font.tables.name;
 
     if (glyfTableEntry && locaTableEntry) {

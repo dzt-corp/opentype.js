@@ -4,16 +4,16 @@
 import check from '../check.mjs';
 import parse from '../parse.mjs';
 import table from '../table.mjs';
-import { getNameByID } from './name.mjs';
+import { getNameByID } from '../fn/get-name-by-id.mjs';
 
 function makeFvarAxis(n, axis) {
     return [
-        {name: 'tag_' + n, type: 'TAG', value: axis.tag},
-        {name: 'minValue_' + n, type: 'FIXED', value: axis.minValue << 16},
-        {name: 'defaultValue_' + n, type: 'FIXED', value: axis.defaultValue << 16},
-        {name: 'maxValue_' + n, type: 'FIXED', value: axis.maxValue << 16},
-        {name: 'flags_' + n, type: 'USHORT', value: 0},
-        {name: 'nameID_' + n, type: 'USHORT', value: axis.axisNameID}
+        { name: 'tag_' + n, type: 'TAG', value: axis.tag },
+        { name: 'minValue_' + n, type: 'FIXED', value: axis.minValue << 16 },
+        { name: 'defaultValue_' + n, type: 'FIXED', value: axis.defaultValue << 16 },
+        { name: 'maxValue_' + n, type: 'FIXED', value: axis.maxValue << 16 },
+        { name: 'flags_' + n, type: 'USHORT', value: 0 },
+        { name: 'nameID_' + n, type: 'USHORT', value: axis.axisNameID }
     ];
 }
 
@@ -33,8 +33,8 @@ function parseFvarAxis(data, start, names) {
 
 function makeFvarInstance(n, inst, axes, optionalFields = {}) {
     const fields = [
-        {name: 'nameID_' + n, type: 'USHORT', value: inst.subfamilyNameID},
-        {name: 'flags_' + n, type: 'USHORT', value: 0}
+        { name: 'nameID_' + n, type: 'USHORT', value: inst.subfamilyNameID },
+        { name: 'flags_' + n, type: 'USHORT', value: 0 }
     ];
 
     for (let i = 0; i < axes.length; ++i) {
@@ -50,7 +50,7 @@ function makeFvarInstance(n, inst, axes, optionalFields = {}) {
         fields.push({
             name: 'postScriptNameID_',
             type: 'USHORT',
-            value: inst.postScriptNameID !== undefined? inst.postScriptNameID : 0xFFFF
+            value: inst.postScriptNameID !== undefined ? inst.postScriptNameID : 0xFFFF
         });
     }
 
@@ -84,15 +84,15 @@ function parseFvarInstance(data, start, axes, names, instanceSize) {
 }
 
 function makeFvarTable(fvar, names) {
-    
+
     const result = new table.Table('fvar', [
-        {name: 'version', type: 'ULONG', value: 0x10000},
-        {name: 'offsetToData', type: 'USHORT', value: 0},
-        {name: 'countSizePairs', type: 'USHORT', value: 2},
-        {name: 'axisCount', type: 'USHORT', value: fvar.axes.length},
-        {name: 'axisSize', type: 'USHORT', value: 20},
-        {name: 'instanceCount', type: 'USHORT', value: fvar.instances.length},
-        {name: 'instanceSize', type: 'USHORT', value: 4 + fvar.axes.length * 4}
+        { name: 'version', type: 'ULONG', value: 0x10000 },
+        { name: 'offsetToData', type: 'USHORT', value: 0 },
+        { name: 'countSizePairs', type: 'USHORT', value: 2 },
+        { name: 'axisCount', type: 'USHORT', value: fvar.axes.length },
+        { name: 'axisSize', type: 'USHORT', value: 20 },
+        { name: 'instanceCount', type: 'USHORT', value: fvar.instances.length },
+        { name: 'instanceSize', type: 'USHORT', value: 4 + fvar.axes.length * 4 }
     ]);
     result.offsetToData = result.sizeOf();
 
@@ -104,7 +104,7 @@ function makeFvarTable(fvar, names) {
 
     // first loop over instances: find out if at least one has postScriptNameID defined
     for (let j = 0; j < fvar.instances.length; j++) {
-        if(fvar.instances[j].postScriptNameID !== undefined) {
+        if (fvar.instances[j].postScriptNameID !== undefined) {
             result.instanceSize += 2;
             optionalFields.postScriptNameID = true;
             break;
@@ -147,7 +147,7 @@ function parseFvarTable(data, start, names) {
         instances.push(parseFvarInstance(data, instanceStart + j * instanceSize, axes, names, instanceSize));
     }
 
-    return {axes: axes, instances: instances};
+    return { axes: axes, instances: instances };
 }
 
 export default { make: makeFvarTable, parse: parseFvarTable };

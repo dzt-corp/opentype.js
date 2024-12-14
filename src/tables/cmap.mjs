@@ -5,7 +5,7 @@ import check from '../check.mjs';
 import parse from '../parse.mjs';
 import table from '../table.mjs';
 import { eightBitMacEncodings } from '../types.mjs';
-import { getEncoding } from '../tables/name.mjs';
+import { getEncoding } from '../fn/get-encoding.mjs';
 
 function parseCmapTableFormat0(cmap, p, platformID, encodingID) {
     // Length in bytes of the index map
@@ -106,7 +106,7 @@ function parseCmapTableFormat14(cmap, p) {
 
     const numVarSelectorRecords = p.parseULong();
 
-    for(let i = 0; i < numVarSelectorRecords; i += 1) {
+    for (let i = 0; i < numVarSelectorRecords; i += 1) {
         const varSelector = p.parseUInt24();
         const varSelectorRecord = {
             varSelector
@@ -114,13 +114,13 @@ function parseCmapTableFormat14(cmap, p) {
 
         const defaultUVSOffset = p.parseOffset32();
         const nonDefaultUVSOffset = p.parseOffset32();
-        
+
         const currentOffset = p.relativeOffset;
 
-        if ( defaultUVSOffset ) {
+        if (defaultUVSOffset) {
             p.relativeOffset = defaultUVSOffset;
             varSelectorRecord.defaultUVS = p.parseStruct({
-                ranges: function() {
+                ranges: function () {
                     return p.parseRecordList32({
                         startUnicodeValue: p.parseUInt24,
                         additionalCount: p.parseByte
@@ -129,17 +129,17 @@ function parseCmapTableFormat14(cmap, p) {
             });
         }
 
-        if ( nonDefaultUVSOffset ) {
+        if (nonDefaultUVSOffset) {
             p.relativeOffset = nonDefaultUVSOffset;
             varSelectorRecord.nonDefaultUVS = p.parseStruct({
-                uvsMappings: function() {
+                uvsMappings: function () {
                     const map = {};
                     const list = p.parseRecordList32({
                         unicodeValue: p.parseUInt24,
                         glyphID: p.parseUShort
                     });
-                    
-                    for(let i = 0; i < list.length; i += 1) {
+
+                    for (let i = 0; i < list.length; i += 1) {
                         map[list[i].unicodeValue] = list[i];
                     }
 
@@ -166,15 +166,15 @@ function parseCmapTable(data, start) {
 
     // The cmap table can contain many sub-tables, each with their own format.
     // We're only interested in a "platform 0" (Unicode format) and "platform 3" (Windows format) table,
-    // 
+    //
     cmap.numTables = parse.getUShort(data, start + 2);
     let format14Parser = null;
     let format14offset = -1;
     let offset = -1;
     let platformId = null;
     let encodingId = null;
-    const platform0Encodings = [0,1,2,3,4,6];
-    const platform3Encodings = [0,1,10];
+    const platform0Encodings = [0, 1, 2, 3, 4, 6];
+    const platform3Encodings = [0, 1, 10];
     for (let i = cmap.numTables - 1; i >= 0; i -= 1) {
         platformId = parse.getUShort(data, start + 4 + (i * 8));
         encodingId = parse.getUShort(data, start + 4 + (i * 8) + 2);
@@ -267,32 +267,32 @@ function makeCmapTable(glyphs) {
     }
 
     let cmapTable = [
-        {name: 'version', type: 'USHORT', value: 0},
-        {name: 'numTables', type: 'USHORT', value: isPlan0Only ? 1 : 2},
+        { name: 'version', type: 'USHORT', value: 0 },
+        { name: 'numTables', type: 'USHORT', value: isPlan0Only ? 1 : 2 },
 
         // CMAP 4 header
-        {name: 'platformID', type: 'USHORT', value: 3},
-        {name: 'encodingID', type: 'USHORT', value: 1},
-        {name: 'offset', type: 'ULONG', value: isPlan0Only ? 12 : (12 + 8)}
+        { name: 'platformID', type: 'USHORT', value: 3 },
+        { name: 'encodingID', type: 'USHORT', value: 1 },
+        { name: 'offset', type: 'ULONG', value: isPlan0Only ? 12 : (12 + 8) }
     ];
 
     if (!isPlan0Only)
         cmapTable.push(...[
             // CMAP 12 header
-            {name: 'cmap12PlatformID', type: 'USHORT', value: 3}, // We encode only for PlatformID = 3 (Windows) because it is supported everywhere
-            {name: 'cmap12EncodingID', type: 'USHORT', value: 10},
-            {name: 'cmap12Offset', type: 'ULONG', value: 0}
+            { name: 'cmap12PlatformID', type: 'USHORT', value: 3 }, // We encode only for PlatformID = 3 (Windows) because it is supported everywhere
+            { name: 'cmap12EncodingID', type: 'USHORT', value: 10 },
+            { name: 'cmap12Offset', type: 'ULONG', value: 0 }
         ]);
 
     cmapTable.push(...[
         // CMAP 4 Subtable
-        {name: 'format', type: 'USHORT', value: 4},
-        {name: 'cmap4Length', type: 'USHORT', value: 0},
-        {name: 'language', type: 'USHORT', value: 0},
-        {name: 'segCountX2', type: 'USHORT', value: 0},
-        {name: 'searchRange', type: 'USHORT', value: 0},
-        {name: 'entrySelector', type: 'USHORT', value: 0},
-        {name: 'rangeShift', type: 'USHORT', value: 0}
+        { name: 'format', type: 'USHORT', value: 4 },
+        { name: 'cmap4Length', type: 'USHORT', value: 0 },
+        { name: 'language', type: 'USHORT', value: 0 },
+        { name: 'segCountX2', type: 'USHORT', value: 0 },
+        { name: 'searchRange', type: 'USHORT', value: 0 },
+        { name: 'entrySelector', type: 'USHORT', value: 0 },
+        { name: 'rangeShift', type: 'USHORT', value: 0 }
     ]);
 
     const t = new table.Table('cmap', cmapTable);
@@ -333,12 +333,12 @@ function makeCmapTable(glyphs) {
 
         // CMAP 4
         if (segment.end <= 65535 && segment.start <= 65535) {
-            endCounts.push({name: 'end_' + i, type: 'USHORT', value: segment.end});
-            startCounts.push({name: 'start_' + i, type: 'USHORT', value: segment.start});
-            idDeltas.push({name: 'idDelta_' + i, type: 'SHORT', value: segment.delta});
-            idRangeOffsets.push({name: 'idRangeOffset_' + i, type: 'USHORT', value: segment.offset});
+            endCounts.push({ name: 'end_' + i, type: 'USHORT', value: segment.end });
+            startCounts.push({ name: 'start_' + i, type: 'USHORT', value: segment.start });
+            idDeltas.push({ name: 'idDelta_' + i, type: 'SHORT', value: segment.delta });
+            idRangeOffsets.push({ name: 'idRangeOffset_' + i, type: 'USHORT', value: segment.offset });
             if (segment.glyphId !== undefined) {
-                glyphIds.push({name: 'glyph_' + i, type: 'USHORT', value: segment.glyphId});
+                glyphIds.push({ name: 'glyph_' + i, type: 'USHORT', value: segment.glyphId });
             }
         } else {
             // Skip Unicode > 65535 (16bit unsigned max) for CMAP 4, will be added in CMAP 12
@@ -348,9 +348,9 @@ function makeCmapTable(glyphs) {
         // CMAP 12
         // Skip Terminator Segment
         if (!isPlan0Only && segment.glyphIndex !== undefined) {
-            cmap12Groups.push({name: 'cmap12Start_' + i, type: 'ULONG', value: segment.start});
-            cmap12Groups.push({name: 'cmap12End_' + i, type: 'ULONG', value: segment.end});
-            cmap12Groups.push({name: 'cmap12Glyph_' + i, type: 'ULONG', value: segment.glyphIndex});
+            cmap12Groups.push({ name: 'cmap12Start_' + i, type: 'ULONG', value: segment.start });
+            cmap12Groups.push({ name: 'cmap12End_' + i, type: 'ULONG', value: segment.end });
+            cmap12Groups.push({ name: 'cmap12Glyph_' + i, type: 'ULONG', value: segment.glyphIndex });
         }
     }
 
@@ -363,7 +363,7 @@ function makeCmapTable(glyphs) {
     for (let i = 0; i < endCounts.length; i++) {
         t.fields.push(endCounts[i]);
     }
-    t.fields.push({name: 'reservedPad', type: 'USHORT', value: 0});
+    t.fields.push({ name: 'reservedPad', type: 'USHORT', value: 0 });
     for (let i = 0; i < startCounts.length; i++) {
         t.fields.push(startCounts[i]);
     }
@@ -392,17 +392,17 @@ function makeCmapTable(glyphs) {
 
         t.cmap12Offset = 12 + (2 * 2) + 4 + t.cmap4Length;
         t.fields.push(...[
-            {name: 'cmap12Format', type: 'USHORT', value: 12},
-            {name: 'cmap12Reserved', type: 'USHORT', value: 0},
-            {name: 'cmap12Length', type: 'ULONG', value: cmap12Length},
-            {name: 'cmap12Language', type: 'ULONG', value: 0},
-            {name: 'cmap12nGroups', type: 'ULONG', value: cmap12Groups.length / 3}
+            { name: 'cmap12Format', type: 'USHORT', value: 12 },
+            { name: 'cmap12Reserved', type: 'USHORT', value: 0 },
+            { name: 'cmap12Length', type: 'ULONG', value: cmap12Length },
+            { name: 'cmap12Language', type: 'ULONG', value: 0 },
+            { name: 'cmap12nGroups', type: 'ULONG', value: cmap12Groups.length / 3 }
         ]);
 
         for (let i = 0; i < cmap12Groups.length; i++) {
             t.fields.push(cmap12Groups[i]);
         }
-        
+
     }
 
     return t;
