@@ -36,7 +36,7 @@ import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontData, parseOS2Table, uncompressTable } from './fn/index.mjs';
+import { getFontFileData, parseOS2Table, uncompressTable } from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -60,7 +60,7 @@ function parseBuffer(buffer, opt = {}) {
     // should be an empty font that we'll fill with our own data.
     const font = new Font({ empty: true });
 
-    const { data, outlinesFormat, tableEntries } = getFontData(buffer);
+    const { data, outlinesFormat, tableEntries } = getFontFileData(buffer);
     const numTables = tableEntries.length;
     font.outlinesFormat = outlinesFormat;
 
@@ -157,8 +157,8 @@ function parseBuffer(buffer, opt = {}) {
                 nameTableEntry = tableEntry;
                 break;
             case 'OS/2':
-                font.tables.os2 = parseOS2Table(table.data, table.offset);
                 table = uncompressTable(data, tableEntry);
+                font.tables.os2 = parseOS2Table(table.data, table.offset);
                 break;
             case 'post':
                 table = uncompressTable(data, tableEntry);

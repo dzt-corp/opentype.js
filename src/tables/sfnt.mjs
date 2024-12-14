@@ -27,7 +27,7 @@ import cvar from './cvar.mjs';
 import gvar from './gvar.mjs';
 import gasp from './gasp.mjs';
 import svg from './svg.mjs';
-import { getUnicodeRange, makeOS2Table } from '../fn/index.mts';
+import { getUnicodeRange, makeOS2Table } from '../fn/index.mjs';
 
 function log2(v) {
     return Math.log(v) / Math.log(2) | 0;
