@@ -1,4 +1,3 @@
-
 const utf16 = 'utf-16';
 
 // MacOS script ID → encoding. This table stores the default case,

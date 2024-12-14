@@ -19,14 +19,21 @@ import gsub from './gsub.mjs';
 import meta from './meta.mjs';
 import colr from './colr.mjs';
 import cpal from './cpal.mjs';
-import fvar from './fvar.mjs';
 import stat from './stat.mjs';
 import avar from './avar.mjs';
 import cvar from './cvar.mjs';
 import gvar from './gvar.mjs';
 import gasp from './gasp.mjs';
 import svg from './svg.mjs';
-import { getUnicodeRange, makeOS2Table, makeNameTable } from '../fn/index.mjs';
+import {
+    getUnicodeRange,
+    makeFvarTable,
+    makeNameTable,
+    makeOS2Table,
+    parseFvarTable,
+} from '../fn/index.mjs';
+
+const fvar = { parse: parseFvarTable, make: makeFvarTable };
 
 function log2(v) {
     return Math.log(v) / Math.log(2) | 0;

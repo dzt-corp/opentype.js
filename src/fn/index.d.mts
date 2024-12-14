@@ -57,9 +57,45 @@ interface OS2Table {
   usMaxContent?: number;
 }
 
-export function getFontFileData(buffer: ArrayBuffer): FontFileData;
-export function parseOS2Table(data: DataView, offset: number): OS2Table;
+type Platform =
+  | 'unicode'
+  | 'macintosh'
+  | 'reserved'
+  | 'windows'
+
+interface NameTable {
+  [key: Platform]: Record<string, Record<string, string>>
+}
+
+interface FVarAxis {
+  tag: string;
+  minValue: number;
+  defaultValue: number;
+  maxValue: number;
+  axisNameID: number;
+  name: Record<string, string>
+}
+
+interface FVarInstance {
+  subfamilyNameID: number;
+  name: Record<string, string>
+  coordinates: Record<string, number>
+  postScriptNameID: number;
+  postScriptName: Record<string, string>
+}
+
+interface FVarTable {
+  axes: FVarAxis[];
+  instances: FVarInstance[];
+}
+
 export function uncompressTable(
   data: DataView,
   tableEntry: TableEntry
 ): TableData;
+
+export function getFontFileData(buffer: ArrayBuffer): FontFileData;
+export function parseOS2Table(data: DataView, offset: number): OS2Table;
+export function parseNameTable(data: DataView, offset: number, ltag: string[]): NameTable;
+export function parseFvarTable(data: DataView, offset: number, names: NameTable): FVarTable;
+// todo ltag table

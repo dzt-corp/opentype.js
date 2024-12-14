@@ -14,7 +14,6 @@ import colr from './tables/colr.mjs';
 import cmap from './tables/cmap.mjs';
 import cff from './tables/cff.mjs';
 import stat from './tables/stat.mjs';
-import fvar from './tables/fvar.mjs';
 import gvar from './tables/gvar.mjs';
 import cvar from './tables/cvar.mjs';
 import avar from './tables/avar.mjs';
@@ -35,7 +34,7 @@ import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
-import { getFontFileData, parseOS2Table, uncompressTable, parseNameTable } from './fn/index.mjs';
+import { getFontFileData, parseOS2Table, uncompressTable, parseNameTable, parseFvarTable } from './fn/index.mjs';
 
 /**
  * The opentype library.
@@ -264,7 +263,7 @@ function parseBuffer(buffer, opt = {}) {
 
     if (fvarTableEntry) {
         const fvarTable = uncompressTable(data, fvarTableEntry);
-        font.tables.fvar = fvar.parse(fvarTable.data, fvarTable.offset, font.names);
+        font.tables.fvar = parseFvarTable(fvarTable.data, fvarTable.offset, font.names);
     }
 
     if (statTableEntry) {
