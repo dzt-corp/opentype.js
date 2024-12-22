@@ -1,10 +1,10 @@
-interface FontFileData {
+export interface FontFileData {
   data: DataView;
   tableEntries: TableEntry[];
   outlinesFormat: string;
 }
 
-interface TableEntry {
+export interface TableEntry {
   tag: string;
   checksum: number;
   offset: number;
@@ -12,12 +12,12 @@ interface TableEntry {
   compression: boolean;
 }
 
-interface TableData {
+export interface TableData {
   data: DataView;
   offset: number;
 }
 
-interface OS2Table {
+export interface OS2Table {
   version: number;
   xAvgCharWidth: number;
   usWeightClass: number;
@@ -57,36 +57,44 @@ interface OS2Table {
   usMaxContent?: number;
 }
 
-type Platform =
-  | 'unicode'
-  | 'macintosh'
-  | 'reserved'
-  | 'windows'
+export type Platform = "unicode" | "macintosh" | "reserved" | "windows";
 
-interface NameTable {
-  [key: Platform]: Record<string, Record<string, string>>
-}
+export type NameTable = {
+  [key in Platform]?: Record<string, Record<string, string>>;
+};
 
-interface FvarAxis {
+export interface FvarAxis {
   tag: string;
   minValue: number;
   defaultValue: number;
   maxValue: number;
   axisNameID: number;
-  name: Record<string, string>
+  name: Record<string, string>;
 }
 
-interface FvarInstance {
+export interface FvarInstance {
   subfamilyNameID: number;
-  name: Record<string, string>
-  coordinates: Record<string, number>
+  name: Record<string, string>;
+  coordinates: Record<string, number>;
   postScriptNameID: number;
-  postScriptName: Record<string, string>
+  postScriptName: Record<string, string>;
 }
 
-interface FvarTable {
+export interface FvarTable {
   axes: FvarAxis[];
   instances: FvarInstance[];
+}
+
+export interface PostTable {
+  isFixedPitch: number;
+  italicAngle: number;
+  maxMemType1: number;
+  maxMemType42: number;
+  minMemType1: number;
+  minMemType42: number;
+  underlinePosition: number;
+  underlineThickness: number;
+  version: number;
 }
 
 export function uncompressTable(
@@ -97,5 +105,15 @@ export function uncompressTable(
 export function getFontFileData(buffer: ArrayBuffer): FontFileData;
 export function parseOS2Table(data: DataView, offset: number): OS2Table;
 export function parseLtagTable(data: DataView, offset: number): string[];
-export function parseNameTable(data: DataView, offset: number, ltag: string[]): NameTable;
-export function parseFvarTable(data: DataView, offset: number, names: NameTable): FvarTable;
+export function parsePostTable(data: DataView, offset: number): PostTable;
+export function parseNameTable(
+  data: DataView,
+  offset: number,
+  ltag: string[]
+): NameTable;
+
+export function parseFvarTable(
+  data: DataView,
+  offset: number,
+  names: NameTable
+): FvarTable;
