@@ -28,7 +28,6 @@ import hmtx from './tables/hmtx.mjs';
 import kern from './tables/kern.mjs';
 import loca from './tables/loca.mjs';
 import maxp from './tables/maxp.mjs';
-import post from './tables/post.mjs';
 import meta from './tables/meta.mjs';
 import gasp from './tables/gasp.mjs';
 import svg from './tables/svg.mjs';
@@ -37,9 +36,10 @@ import {
     getFontFileData,
     parseOS2Table,
     uncompressTable,
-    parseNameTable,
     parseFvarTable,
-    parseLtagTable
+    parseLtagTable,
+    parseNameTable,
+    parsePostTable,
 } from './fn/index.mjs';
 
 /**
@@ -166,7 +166,7 @@ function parseBuffer(buffer, opt = {}) {
                 break;
             case 'post':
                 table = uncompressTable(data, tableEntry);
-                font.tables.post = post.parse(table.data, table.offset);
+                font.tables.post = parsePostTable(table.data, table.offset);
                 font.glyphNames = new GlyphNames(font.tables.post);
                 break;
             case 'prep':

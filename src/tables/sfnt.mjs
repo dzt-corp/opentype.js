@@ -14,7 +14,6 @@ import hhea from './hhea.mjs';
 import hmtx from './hmtx.mjs';
 import ltag from './ltag.mjs';
 import maxp from './maxp.mjs';
-import post from './post.mjs';
 import gsub from './gsub.mjs';
 import meta from './meta.mjs';
 import colr from './colr.mjs';
@@ -30,6 +29,7 @@ import {
     makeFvarTable,
     makeNameTable,
     makeOS2Table,
+    makePostTable,
     parseFvarTable,
 } from '../fn/index.mjs';
 
@@ -341,7 +341,7 @@ function fontToSfntTable(font) {
     const nameTable = makeNameTable(names, languageTags);
     const ltagTable = (languageTags.length > 0 ? ltag.make(languageTags) : undefined);
 
-    const postTable = post.make(font);
+    const postTable = makePostTable(font);
     const cffTable = cff.make(font.glyphs, {
         version: font.getEnglishName('version'),
         fullName: englishFullName,
