@@ -9,7 +9,6 @@ import table from '../table.mjs';
 
 import cmap from './cmap.mjs';
 import cff from './cff.mjs';
-import head from './head.mjs';
 import hhea from './hhea.mjs';
 import hmtx from './hmtx.mjs';
 import ltag from './ltag.mjs';
@@ -32,6 +31,7 @@ import {
     makePostTable,
     parseFvarTable,
 } from '../fn/index.mjs';
+import { makeHeadTable } from '../fn/make-head-table.mjs';
 
 const fvar = { parse: parseFvarTable, make: makeFvarTable };
 
@@ -225,7 +225,7 @@ function fontToSfntTable(font) {
         macStyle |= font.macStyleValues.ITALIC;
     }
 
-    const headTable = head.make({
+    const headTable = makeHeadTable({
         flags: 3, // 00000011 (baseline for font at y=0; left sidebearing point at x=0)
         unitsPerEm: font.unitsPerEm,
         xMin: globals.xMin,

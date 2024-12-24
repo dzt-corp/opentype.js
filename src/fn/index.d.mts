@@ -96,6 +96,25 @@ export interface PostTable {
   underlineThickness: number;
   version: number;
 }
+export interface HeadTable {
+  version: number
+  fontRevision: number
+  checkSumAdjustment: number
+  magicNumber: 0x5F0F3CF5
+  flags: number
+  unitsPerEm: number
+  created: number
+  modified: number
+  xMin: number
+  yMin: number
+  xMax: number
+  yMax: number
+  macStyle: number
+  lowestRecPPEM: number
+  fontDirectionHint: number
+  indexToLocFormat: number
+  glyphDataFormat: number
+}
 
 export function uncompressTable(
   data: DataView,
@@ -103,9 +122,11 @@ export function uncompressTable(
 ): TableData;
 
 export function getFontFileData(buffer: ArrayBuffer): FontFileData;
-export function parseOS2Table(data: DataView, offset: number): OS2Table;
+export function parseHeadTable(data: DataView, offset: number): HeadTable;
 export function parseLtagTable(data: DataView, offset: number): string[];
+export function parseOS2Table(data: DataView, offset: number): OS2Table;
 export function parsePostTable(data: DataView, offset: number): PostTable;
+
 export function parseNameTable(
   data: DataView,
   offset: number,

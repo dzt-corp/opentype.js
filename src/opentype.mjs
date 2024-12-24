@@ -22,7 +22,6 @@ import glyf from './tables/glyf.mjs';
 import gdef from './tables/gdef.mjs';
 import gpos from './tables/gpos.mjs';
 import gsub from './tables/gsub.mjs';
-import head from './tables/head.mjs';
 import hhea from './tables/hhea.mjs';
 import hmtx from './tables/hmtx.mjs';
 import kern from './tables/kern.mjs';
@@ -34,12 +33,13 @@ import svg from './tables/svg.mjs';
 import { PaletteManager } from './palettes.mjs';
 import {
     getFontFileData,
-    parseOS2Table,
-    uncompressTable,
     parseFvarTable,
+    parseHeadTable,
     parseLtagTable,
     parseNameTable,
+    parseOS2Table,
     parsePostTable,
+    uncompressTable,
 } from './fn/index.mjs';
 
 /**
@@ -123,7 +123,7 @@ function parseBuffer(buffer, opt = {}) {
                 break;
             case 'head':
                 table = uncompressTable(data, tableEntry);
-                font.tables.head = head.parse(table.data, table.offset);
+                font.tables.head = parseHeadTable(table.data, table.offset);
                 font.unitsPerEm = font.tables.head.unitsPerEm;
                 indexToLocFormat = font.tables.head.indexToLocFormat;
                 break;
