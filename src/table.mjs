@@ -1,8 +1,6 @@
 // Table metadata
 
 import check from './check.mjs';
-import { encode } from './fn/encode.mjs';
-import { sizeOf } from './fn/size-of.mjs';
 
 /**
  * @exports opentype.Table
@@ -33,22 +31,6 @@ function Table(tableName, fields, options) {
         }
     }
 }
-
-/**
- * Encodes the table and returns an array of bytes
- * @return {Array}
- */
-Table.prototype.encode = function() {
-    return encode.TABLE(this);
-};
-
-/**
- * Get the size of the table.
- * @return {number}
- */
-Table.prototype.sizeOf = function() {
-    return sizeOf.TABLE(this);
-};
 
 /**
  * @private

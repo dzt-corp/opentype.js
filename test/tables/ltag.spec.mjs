@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { hex, unhex } from '../testutil.mjs';
 import ltag from '../../src/tables/ltag.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 describe('tables/ltag.mjs', function() {
     const data =
@@ -11,7 +12,7 @@ describe('tables/ltag.mjs', function() {
     const tags = ['en', 'zh-Hant', 'zh', 'sl-rozaj-solba-1994'];
 
     it('can make a language tag table', function() {
-        assert.deepEqual(data, hex(ltag.make(tags).encode()));
+        assert.deepEqual(data, hex(encode.TABLE(ltag.make(tags))));
     });
 
     it('can parse a language tag table', function() {

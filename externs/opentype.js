@@ -577,18 +577,6 @@ opentype.Substitution.prototype.add = function(feature, sub, script, language) {
 opentype.Table = function(tableName, fields, options) {};
 
 /**
- * Encodes the table and returns an array of bytes
- * @return {Array}
- */
-opentype.Table.prototype.encode = function() {};
-
-/**
- * Get the size of the table.
- * @return {number}
- */
-opentype.Table.prototype.sizeOf = function() {};
-
-/**
  * @type {string}
  */
 opentype.Table.prototype.tableName;

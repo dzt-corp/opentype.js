@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { hex, unhex } from '../testutil.mjs';
 import avar from '../../src/tables/avar.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 describe('tables/avar.mjs', function() {
     const fvar = {axes: [
@@ -51,7 +52,7 @@ describe('tables/avar.mjs', function() {
     });
 
     it('can make an axis variation table', function() {
-        const encodedTable = avar.make(table, fvar).encode();
+        const encodedTable = encode.TABLE(avar.make(table, fvar));
         assert.deepEqual(hex(encodedTable), data);
     });
 });

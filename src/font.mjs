@@ -12,6 +12,7 @@ import { SVGImageManager } from './svgimages.mjs';
 import { VariationManager } from './variation.mjs';
 import HintingTrueType from './hintingtt.mjs';
 import Bidi from './bidi.mjs';
+import { encode } from './fn/encode.mjs';
 import { applyPaintType } from './tables/cff.mjs';
 
 function createDefaultNamesInfo(options) {
@@ -615,7 +616,7 @@ Font.prototype.toBuffer = function() {
  */
 Font.prototype.toArrayBuffer = function() {
     const sfntTable = this.toTables();
-    const bytes = sfntTable.encode();
+    const bytes = encode.TABLE(sfntTable);
     const buffer = new ArrayBuffer(bytes.length);
     const intArray = new Uint8Array(buffer);
     for (let i = 0; i < bytes.length; i++) {

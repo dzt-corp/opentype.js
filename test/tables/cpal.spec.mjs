@@ -2,6 +2,7 @@ import assert from 'assert';
 import { hex, unhex, enableMockCanvas } from '../testutil.mjs';
 import cpal, { parseColor } from '../../src/tables/cpal.mjs';
 import Font from '../../src/font.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 describe('tables/cpal.mjs', function() {
     const data = '00 00 00 02 00 02 00 04 00 00 00 10 00 00 00 02 ' +
@@ -28,11 +29,11 @@ describe('tables/cpal.mjs', function() {
     });
 
     it('can make cpal table', function() {
-        const hexString = hex(cpal.make(obj).encode());
+        const hexString = hex(encode.TABLE(cpal.make(obj)));
         cpal.parse(unhex(hexString), 0);
         assert.deepStrictEqual(data, hexString);
     });
-    
+
     const colors = [
         cpal.getPaletteColor(font, 0),
         cpal.getPaletteColor(font, 1),
@@ -88,7 +89,7 @@ describe('tables/cpal.mjs', function() {
             parseColor('hsl( 260.82, 42.61%, 77.45%)', 'hexa'),
             parseColor('hsla(260.82, 42.61%, 77.45%, 0.9373)', 'raw'),
             parseColor('background: hsl(0.3turn 48% 48%);', 'rgb'),
-            
+
             parseColor('rebeccapurple', 'hex'),
         ];
 

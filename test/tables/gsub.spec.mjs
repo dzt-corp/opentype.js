@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { unhex, unhexArray } from '../testutil.mjs';
 import gsub from '../../src/tables/gsub.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 // Helper that builds a minimal GSUB table to test a lookup subtable.
 function parseLookup(lookupType, subTableData) {
@@ -14,7 +15,7 @@ function parseLookup(lookupType, subTableData) {
 }
 
 function makeLookup(lookupType, data) {
-    return gsub.make({
+    return encode.TABLE(gsub.make({
         version: 1,
         scripts: [],
         features: [],
@@ -23,7 +24,7 @@ function makeLookup(lookupType, data) {
             lookupFlag: 0,
             subtables: [data]
         }]
-    }).encode().slice(0x1a);                             // sub table start offset: 0x1a
+    })).slice(0x1a);                             // sub table start offset: 0x1a
 }
 
 describe('tables/gsub.mjs', function() {
@@ -191,17 +192,17 @@ describe('tables/gsub.mjs', function() {
         assert.deepEqual(parseLookup(5, data), {
             substFormat: 3,
             coverages: [{
-                    format: 1,
-                    glyphs: [0x33, 0x35, 0x37, 0x38, 0x39, 0x3b, 0x3c, 0x3d, 0x41, 0x42, 0x45, 0x4a]
-                },
-                {
-                    format: 1,
-                    glyphs: [0x32, 0x34, 0x36, 0x3a, 0x3e, 0x3f, 0x40, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4b]
-                },
-                {
-                    format: 1,
-                    glyphs: [0x38, 0x3b, 0x41, 0x42, 0x4a]
-                }],
+                format: 1,
+                glyphs: [0x33, 0x35, 0x37, 0x38, 0x39, 0x3b, 0x3c, 0x3d, 0x41, 0x42, 0x45, 0x4a]
+            },
+            {
+                format: 1,
+                glyphs: [0x32, 0x34, 0x36, 0x3a, 0x3e, 0x3f, 0x40, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4b]
+            },
+            {
+                format: 1,
+                glyphs: [0x38, 0x3b, 0x41, 0x42, 0x4a]
+            }],
             lookupRecords: [
                 { sequenceIndex: 0, lookupListIndex: 1 },
                 { sequenceIndex: 2, lookupListIndex: 2 }
@@ -296,14 +297,14 @@ describe('tables/gsub.mjs', function() {
         assert.deepEqual(parseLookup(6, data), {
             substFormat: 3,
             backtrackCoverage: [
-            {
-                format: 2,
-                ranges: [{ start: 1666, end: 1681, index: 0 }]
-            },
-            {
-                format: 2,
-                ranges: [{ start: 1285, end: 1318, index: 0 }]
-            }
+                {
+                    format: 2,
+                    ranges: [{ start: 1666, end: 1681, index: 0 }]
+                },
+                {
+                    format: 2,
+                    ranges: [{ start: 1285, end: 1318, index: 0 }]
+                }
             ],
             inputCoverage: [{ format: 1, glyphs: [939] }],
             lookaheadCoverage: [{
@@ -316,10 +317,10 @@ describe('tables/gsub.mjs', function() {
             }
             ],
             lookupRecords: [
-            {
-                sequenceIndex: 0,
-                lookupListIndex: 50
-            }
+                {
+                    sequenceIndex: 0,
+                    lookupListIndex: 50
+                }
             ]
         });
     });
@@ -417,7 +418,7 @@ describe('tables/gsub.mjs', function() {
                 }]
             }]
         };
-        assert.deepEqual(gsub.make(gsubTable).encode(), expectedData);
+        assert.deepEqual(encode.TABLE(gsub.make(gsubTable)), expectedData);
     });
 
     it('can write a lookup with coverage table format 2', function() {
@@ -612,17 +613,17 @@ describe('tables/gsub.mjs', function() {
         assert.deepEqual(makeLookup(5, {
             substFormat: 3,
             coverages: [{
-                    format: 1,
-                    glyphs: [0x33, 0x35, 0x37, 0x38, 0x39, 0x3b, 0x3c, 0x3d, 0x41, 0x42, 0x45, 0x4a]
-                },
-                {
-                    format: 1,
-                    glyphs: [0x32, 0x34, 0x36, 0x3a, 0x3e, 0x3f, 0x40, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4b]
-                },
-                {
-                    format: 1,
-                    glyphs: [0x38, 0x3b, 0x41, 0x42, 0x4a]
-                }],
+                format: 1,
+                glyphs: [0x33, 0x35, 0x37, 0x38, 0x39, 0x3b, 0x3c, 0x3d, 0x41, 0x42, 0x45, 0x4a]
+            },
+            {
+                format: 1,
+                glyphs: [0x32, 0x34, 0x36, 0x3a, 0x3e, 0x3f, 0x40, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4b]
+            },
+            {
+                format: 1,
+                glyphs: [0x38, 0x3b, 0x41, 0x42, 0x4a]
+            }],
             lookupRecords: [
                 { sequenceIndex: 0, lookupListIndex: 1 },
                 { sequenceIndex: 2, lookupListIndex: 2 }
@@ -715,14 +716,14 @@ describe('tables/gsub.mjs', function() {
         assert.deepEqual(makeLookup(6, {
             substFormat: 3,
             backtrackCoverage: [
-            {
-                format: 2,
-                ranges: [{ start: 1666, end: 1681, index: 0 }]
-            },
-            {
-                format: 2,
-                ranges: [{ start: 1285, end: 1318, index: 0 }]
-            }
+                {
+                    format: 2,
+                    ranges: [{ start: 1666, end: 1681, index: 0 }]
+                },
+                {
+                    format: 2,
+                    ranges: [{ start: 1285, end: 1318, index: 0 }]
+                }
             ],
             inputCoverage: [{ format: 1, glyphs: [939] }],
             lookaheadCoverage: [{
@@ -735,10 +736,10 @@ describe('tables/gsub.mjs', function() {
             }
             ],
             lookupRecords: [
-            {
-                sequenceIndex: 0,
-                lookupListIndex: 50
-            }
+                {
+                    sequenceIndex: 0,
+                    lookupListIndex: 50
+                }
             ]
         }), expectedData);
     });
