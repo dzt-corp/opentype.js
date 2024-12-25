@@ -5,11 +5,11 @@
 
 // @TODO: refactor parsing using stateful parser?
 
-import { 
-    CffEncoding, 
-    cffStandardEncoding, 
-    cffExpertEncoding, 
-    cffStandardStrings, 
+import {
+    CffEncoding,
+    cffStandardEncoding,
+    cffExpertEncoding,
+    cffStandardStrings,
     cffISOAdobeStrings,
     cffIExpertStrings,
     cffExpertSubsetStrings } from '../encoding.mjs';
@@ -17,6 +17,7 @@ import glyphset from '../glyphset.mjs';
 import parse from '../parse.mjs';
 import Path from '../path.mjs';
 import table from '../table.mjs';
+import { sizeOf } from '../fn/size-of.mjs';
 
 // Custom equals function that can also check lists.
 function equals(a, b) {
@@ -525,7 +526,7 @@ function parseCFFCharset(data, start, nGlyphs, strings, isCIDFont) {
             } else {
                 charset.push(getCFFString(strings, sid) || sid);
             }
-            
+
         }
     } else if (format === 1) {
         while (charset.length <= nGlyphs) {
@@ -535,7 +536,7 @@ function parseCFFCharset(data, start, nGlyphs, strings, isCIDFont) {
                 if(isCIDFont) {
                     charset.push('cid' + ('00000' + sid).slice(-5));
                 } else {
-                    charset.push(getCFFString(strings, sid) || sid);    
+                    charset.push(getCFFString(strings, sid) || sid);
                 }
                 sid += 1;
             }
@@ -548,7 +549,7 @@ function parseCFFCharset(data, start, nGlyphs, strings, isCIDFont) {
                 if(isCIDFont) {
                     charset.push('cid' + ('00000' + sid).slice(-5));
                 } else {
-                    charset.push(getCFFString(strings, sid) || sid);    
+                    charset.push(getCFFString(strings, sid) || sid);
                 }
                 sid += 1;
             }
@@ -600,8 +601,8 @@ function parseBlend(operands) {
 
 /**
  * Applies path styles according to a CFF font's PaintType
- * @param {Font} font 
- * @param {Path} path 
+ * @param {Font} font
+ * @param {Path} path
  * @returns {Number} paintType
  */
 function applyPaintType(font, path) {
@@ -941,17 +942,17 @@ function parseCFFCharstring(font, glyph, code, version, coords) {
                     }
 
                     // https://learn.microsoft.com/en-us/typography/opentype/spec/cff2charstr#syntax-for-font-variations-support-operators
-                    
+
                     if(!blendVector) {
                         blendVector = font.variation && coords && font.variation.process.getBlendVector(vstore, vsindex, coords);
                     }
-                    
+
                     var n = stack.pop();
                     var axisCount = blendVector ? blendVector.length : vstore.itemVariationSubtables[vsindex].regionIndexes.length;
                     var deltaSetCount = n * axisCount;
                     var delta = stack.length - deltaSetCount;
                     var deltaSetIndex = delta - n;
-      
+
                     if(blendVector) {
                         for (let i = 0; i < n; i++) {
                             var sum = stack[deltaSetIndex + i];
@@ -961,7 +962,7 @@ function parseCFFCharstring(font, glyph, code, version, coords) {
                             stack[deltaSetIndex + i] = sum;
                         }
                     }
-    
+
                     while (deltaSetCount--) {
                         stack.pop();
                     }
@@ -1158,7 +1159,7 @@ function parseCFFCharstring(font, glyph, code, version, coords) {
             return c;
         });
     }
-    
+
     if (haveWidth) {
         glyph.advanceWidth = width;
     }
@@ -1335,7 +1336,7 @@ function parseCFFTable(data, start, font, opt) {
         } else {
             encoding = parseCFFEncoding(data, start + topDict.encoding);
         }
-        
+
         font.cffEncoding = new CffEncoding(encoding, charset);
 
         // Prefer the CMAP encoding to the CFF encoding.
@@ -1632,17 +1633,17 @@ function makeCFFTable(glyphs, options) {
     // Needs to come at the end, to encode all custom strings used in the font.
     t.stringIndex = makeStringIndex(strings);
 
-    const startOffset = t.header.sizeOf() +
-        t.nameIndex.sizeOf() +
-        t.topDictIndex.sizeOf() +
-        t.stringIndex.sizeOf() +
-        t.globalSubrIndex.sizeOf();
+    const startOffset = sizeOf.TABLE(t.header) +
+        sizeOf.TABLE(t.nameIndex) +
+        sizeOf.TABLE(t.topDictIndex) +
+        sizeOf.TABLE(t.stringIndex) +
+        sizeOf.TABLE(t.globalSubrIndex);
     attrs.charset = startOffset;
 
     // We use the CFF standard encoding; proper encoding will be handled in cmap.
     attrs.encoding = 0;
-    attrs.charStrings = attrs.charset + t.charsets.sizeOf();
-    attrs.private[1] = attrs.charStrings + t.charStringsIndex.sizeOf();
+    attrs.charStrings = attrs.charset + sizeOf.TABLE(t.charsets);
+    attrs.private[1] = attrs.charStrings + sizeOf.TABLE(t.charStringsIndex);
 
     // Recreate the Top DICT INDEX with the correct offsets.
     topDict = makeTopDict(attrs, strings);

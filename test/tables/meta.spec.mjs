@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { hex, unhex } from '../testutil.mjs';
 import meta from '../../src/tables/meta.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 // Based on https://github.com/behdad/fonttools/blob/a5968458015b519bc415f3ca7d882a428f45c347/Lib/fontTools/ttLib/tables/_m_e_t_a_test.py
 describe('tables/meta.mjs', function() {
@@ -30,7 +31,7 @@ describe('tables/meta.mjs', function() {
             slng: 'Latn,Grek,Cyrl'
         };
 
-        const hexString = hex(meta.make(obj).encode());
+        const hexString = hex(encode.TABLE(meta.make(obj)));
         meta.parse(unhex(hexString), 0);
         assert.deepEqual(data, hexString);
     });

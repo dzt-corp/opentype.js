@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { unhexArray } from './testutil.mjs';
 import table from '../src/table.mjs';
+import { encode } from '../src/fn/encode.mjs';
 
 describe('table.mjs', function() {
     it('should make a ScriptList table', function() {
@@ -14,7 +15,7 @@ describe('table.mjs', function() {
             '0000 0003 0003 0000 0001 0002'                     // UrduLangSys
         );
 
-        assert.deepEqual(new table.ScriptList([
+        assert.deepEqual(encode.TABLE(new table.ScriptList([
             { tag: 'hani', script: {
                 defaultLangSys: {
                     reserved: 0,
@@ -44,7 +45,7 @@ describe('table.mjs', function() {
                     }
                 }]
             } },
-        ]).encode(), expectedData);
+        ])), expectedData);
     });
 
     it('should make a ClassDefFormat1 table', function() {
@@ -54,14 +55,14 @@ describe('table.mjs', function() {
             '0000 0001 0000 0001 0000 0001 0002 0001 0000 0002 0001 0001 0000' +
             '0000 0000 0002 0002 0000 0000 0001 0000 0000 0000 0000 0002 0001'
         );
-        assert.deepEqual(new table.ClassDef({
+        assert.deepEqual(encode.TABLE(new table.ClassDef({
             format: 1,
             startGlyph: 0x32,
             classes: [
                 0, 1, 0, 1, 0, 1, 2, 1, 0, 2, 1, 1, 0,
                 0, 0, 2, 2, 0, 0, 1, 0, 0, 0, 0, 2, 1
             ]
-        }).encode(), expectedData);
+        })), expectedData);
     });
 
     it('should make a ClassDefFormat2 table', function() {
@@ -70,13 +71,13 @@ describe('table.mjs', function() {
             '0002 0003 0030 0031 0002 0040 0041 0003 00D2 00D3 0001'
         );
 
-        assert.deepEqual(new table.ClassDef({
+        assert.deepEqual(encode.TABLE(new table.ClassDef({
             format: 2,
             ranges: [
                 { start: 0x30, end: 0x31, classId: 2 },
                 { start: 0x40, end: 0x41, classId: 3 },
                 { start: 0xd2, end: 0xd3, classId: 1 }
             ]
-        }).encode(), expectedData);
+        })), expectedData);
     });
 });

@@ -1,3 +1,6 @@
+export * from './decode.mjs';
+export * from './encode.mjs';
+export * from './eight-bit-mac-encodings.mjs';
 export * from './get-encoding.mjs';
 export * from './get-font-file-data.mjs';
 export * from './get-name-by-id.mjs';
@@ -19,5 +22,6 @@ export * from './parse-os2-table.mjs';
 export * from './parse-post-table.mjs';
 export * from './parse-woff-table-entries.mjs';
 export * from './platforms.mjs';
+export * from './size-of.mjs';
 export * from './uncompress-table.mjs';
 export * from './windows-languages.mjs';

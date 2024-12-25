@@ -2,6 +2,7 @@
 // https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6fvar.html
 
 import table from '../table.mjs';
+import { sizeOf } from './size-of.mjs';
 
 function makeFvarAxis(n, axis) {
     return [
@@ -52,7 +53,7 @@ export function makeFvarTable(fvar, names) {
         { name: 'instanceCount', type: 'USHORT', value: fvar.instances.length },
         { name: 'instanceSize', type: 'USHORT', value: 4 + fvar.axes.length * 4 }
     ]);
-    result.offsetToData = result.sizeOf();
+    result.offsetToData = sizeOf.TABLE(result);
 
     for (let i = 0; i < fvar.axes.length; i++) {
         result.fields = result.fields.concat(makeFvarAxis(i, fvar.axes[i], names));

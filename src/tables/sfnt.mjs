@@ -24,12 +24,14 @@ import gvar from './gvar.mjs';
 import gasp from './gasp.mjs';
 import svg from './svg.mjs';
 import {
+    encode,
     getUnicodeRange,
     makeFvarTable,
     makeNameTable,
     makeOS2Table,
     makePostTable,
     parseFvarTable,
+    sizeOf,
 } from '../fn/index.mjs';
 import { makeHeadTable } from '../fn/make-head-table.mjs';
 
@@ -83,7 +85,7 @@ function makeSfntTable(tables) {
     const recordFields = [];
     const tableFields = [];
 
-    let offset = sfnt.sizeOf() + (makeTableRecord().sizeOf() * sfnt.numTables);
+    let offset = sizeOf.TABLE(sfnt) + (sizeOf.TABLE(makeTableRecord()) * sfnt.numTables);
     while (offset % 4 !== 0) {
         offset += 1;
         tableFields.push({ name: 'padding', type: 'BYTE', value: 0 });
@@ -92,8 +94,8 @@ function makeSfntTable(tables) {
     for (let i = 0; i < tables.length; i += 1) {
         const t = tables[i];
         check.argument(t.tableName.length === 4, 'Table name' + t.tableName + ' is invalid.');
-        const tableLength = t.sizeOf();
-        const tableRecord = makeTableRecord(t.tableName, computeCheckSum(t.encode()), offset, tableLength);
+        const tableLength = sizeOf.TABLE(t);
+        const tableRecord = makeTableRecord(t.tableName, computeCheckSum(encode.TABLE(t)), offset, tableLength);
         recordFields.push({ name: tableRecord.tag + ' Table Record', type: 'RECORD', value: tableRecord });
         tableFields.push({ name: t.tableName + ' table', type: 'RECORD', value: t });
         offset += tableLength;
@@ -397,7 +399,7 @@ function fontToSfntTable(font) {
     const sfntTable = makeSfntTable(tables);
 
     // Compute the font's checkSum and store it in head.checkSumAdjustment.
-    const bytes = sfntTable.encode();
+    const bytes = encode.TABLE(sfntTable);
     const checkSum = computeCheckSum(bytes);
     const tableFields = sfntTable.fields;
     let checkSumAdjusted = false;

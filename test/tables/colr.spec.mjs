@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { hex, unhex } from '../testutil.mjs';
 import colr from '../../src/tables/colr.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 describe('tables/colr.mjs', function () {
     const data = '00 00 00 02 00 00 00 0E 00 00 00 1A 00 03 ' +
@@ -24,7 +25,7 @@ describe('tables/colr.mjs', function () {
     });
 
     it('can make colr table', function () {
-        const hexString = hex(colr.make(obj).encode());
+        const hexString = hex(encode.TABLE(colr.make(obj)));
         colr.parse(unhex(hexString), 0);
         assert.deepStrictEqual(data, hexString);
     });

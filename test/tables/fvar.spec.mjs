@@ -3,6 +3,7 @@ import { hex, unhex } from '../testutil.mjs';
 import { Font, parse } from '../../src/opentype.mjs';
 import { readFileSync } from 'fs';
 import { makeFvarTable, parseFvarTable } from '../../src/fn/index.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 const loadSync = (url, opt) => parse(readFileSync(url), opt);
 
 describe('tables/fvar.mjs', function() {
@@ -106,7 +107,7 @@ describe('tables/fvar.mjs', function() {
                 257: {en: 'Weight', ja: 'ウエイト'}
             }
         };
-        assert.deepEqual(data, hex(makeFvarTable(table, names).encode()));
+        assert.deepEqual(data, hex(encode.TABLE(makeFvarTable(table, names))));
     });
 
     it('writes postScriptNameID optionally', function() {
@@ -122,7 +123,7 @@ describe('tables/fvar.mjs', function() {
 
         parsedFont = parse(parsedFont.toArrayBuffer());
         makeTable = makeFvarTable(parsedFont.tables.fvar, parsedFont.names);
-        
+
         assert.equal(makeTable.instanceSize, 8);
 
         assert.equal(parsedFont.tables.fvar.instances[0].postScriptNameID, undefined);
