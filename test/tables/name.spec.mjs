@@ -1,7 +1,8 @@
 import assert from 'assert';
 import table from '../../src/table.mjs';
-import { encode } from '../../src/types.mjs';
-import _name from '../../src/tables/name.mjs';
+import { encode } from '../../src/fn/encode.mjs';
+import { parseNameTable as _parseNameTable } from '../../src/fn/parse-name-table.mjs';
+import { makeNameTable as _makeNameTable } from '../../src/fn/make-name-table.mjs';
 import { hex, unhex } from '../testutil.mjs';
 
 // For testing, we need a custom function that builds name tables.
@@ -46,7 +47,7 @@ function makeNameTable(names) {
 }
 
 function parseNameTable(names, ltag) {
-    return _name.parse(makeNameTable(names), 0, ltag);
+    return _parseNameTable(makeNameTable(names), 0, ltag);
 }
 
 function getNameRecords(names) {
@@ -187,7 +188,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N1 [00 57 00 61 00 6C 00 72 00 75 00 73]',
             'Uni UTF-16 1 N1 [00 57 00 61 00 6C 00 72 00 6F 00 73 00 73]',
             'Uni UTF-16 2 N1 [00 57 00 61 00 6C 00 72 00 75 00 73]',
@@ -227,7 +228,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N1 [00 57 00 61 00 6C 00 72 00 6F 00 DF]',
             'Uni UTF-16 1 N1 [00 41 00 69 00 76 00 69 00 71]',
             'Win UCS-2 Inuktitut-Latin/Canada N1 [00 41 00 69 00 76 00 69 00 71]'
@@ -259,7 +260,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N1 [6D 77 99 AC]',
             'Win UCS-2 Japanese/Japan N1 [6D 77 99 AC]'
         ]);
@@ -287,7 +288,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N1 [00 48 00 65 00 6C 00 6C 00 6F 20 3D]',
             'Win UCS-2 English/US N1 [00 48 00 65 00 6C 00 6C 00 6F 20 3D]'
         ]);
@@ -318,7 +319,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N1 [14 0A 14 03 15 55 15 85]',
             'Mac smEthiopic langInuktitut N1 [84 80 CD E7]',
             'Win UCS-2 Inuktitut/Canada N1 [14 0A 14 03 15 55 15 85]'
@@ -349,7 +350,7 @@ describe('tables/name.mjs', function() {
             }
         };
         const ltag = [];
-        assert.deepEqual(getNameRecords(_name.make(names, ltag)), [
+        assert.deepEqual(getNameRecords(_makeNameTable(names, ltag)), [
             'Uni UTF-16 0 N256 [00 57 00 69 00 64 00 74 00 68]',
             'Uni UTF-16 1 N256 [00 42 00 72 00 65 00 69 00 74 00 65]',
             'Mac smRoman langEnglish N256 [57 69 64 74 68]',

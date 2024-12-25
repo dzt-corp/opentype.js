@@ -1,4 +1,4 @@
-import { decode } from '../types.mjs';
+import { decode } from './decode.mjs';
 import parse from '../parse.mjs';
 import { nameTableNames } from './name-table-names.mjs';
 import { macLanguages } from './mac-languages.mjs';

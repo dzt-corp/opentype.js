@@ -3,7 +3,7 @@
 
 import check from '../check.mjs';
 import parse from '../parse.mjs';
-import { getNameByID } from '../fn/get-name-by-id.mjs';
+import { getNameByID } from './get-name-by-id.mjs';
 
 function parseFvarAxis(data, start, names) {
     const axis = {};
