@@ -1,7 +1,8 @@
 // Table metadata
 
 import check from './check.mjs';
-import { encode, sizeOf } from './types.mjs';
+import { encode } from './fn/encode.mjs';
+import { sizeOf } from './fn/size-of.mjs';
 
 /**
  * @exports opentype.Table

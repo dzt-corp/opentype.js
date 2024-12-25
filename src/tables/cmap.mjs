@@ -4,7 +4,7 @@
 import check from '../check.mjs';
 import parse from '../parse.mjs';
 import table from '../table.mjs';
-import { eightBitMacEncodings } from '../types.mjs';
+import { eightBitMacEncodings } from '../fn/eight-bit-mac-encodings.mjs';
 import { getEncoding } from '../fn/get-encoding.mjs';
 
 function parseCmapTableFormat0(cmap, p, platformID, encodingID) {

@@ -1,4 +1,4 @@
-import { encode } from '../types.mjs';
+import { encode } from './encode.mjs';
 import table from '../table.mjs';
 import { nameTableNames } from './name-table-names.mjs';
 import { getEncoding } from './get-encoding.mjs';

@@ -1,7 +1,7 @@
 import assert from 'assert';
 import Font from '../../src/font.mjs';
 import sfnt from '../../src/tables/sfnt.mjs';
-import { encode } from '../../src/types.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 import { parseNameTable } from '../../src/fn/parse-name-table.mjs';
 
 function encodeAndParseTable(table, parser) {

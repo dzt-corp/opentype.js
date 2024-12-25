@@ -1,8 +1,10 @@
 import assert from 'assert';
 import { hex, unhex } from './testutil.mjs';
-import { decode, encode, sizeOf } from '../src/types.mjs';
+import { encode } from '../src/fn/encode.mjs';
+import { decode } from '../src/fn/decode.mjs';
+import { sizeOf } from '../src/fn/size-of.mjs';
 
-describe('types.mjs', function() {
+describe('types', function() {
     it('can handle BYTE', function() {
         assert.equal(hex(encode.BYTE(0xFE)), 'FE');
         assert.equal(sizeOf.BYTE(0xFE), 1);
@@ -405,7 +407,7 @@ describe('types.mjs', function() {
         const foo = {name: 'foo', type: 'STRING', value: 'hello'};
         const bar = {name: 'bar', type: 'NUMBER', value: 23};
         assert.equal(hex(encode.INDEX([foo, bar])),
-                     '00 02 01 01 06 07 68 65 6C 6C 6F A2');
+            '00 02 01 01 06 07 68 65 6C 6C 6F A2');
         assert.equal(sizeOf.INDEX([foo, bar]), 12);
     });
 
@@ -516,18 +518,18 @@ describe('types.mjs', function() {
                     {
                         name: 'script_0', type: 'TABLE', value: {
                             fields: [
-                            {
-                                name: 'defaultLangSys', type: 'TABLE', value: {
-                                    fields: [
-                                        {name: 'lookupOrder', type: 'USHORT', value: 0},
-                                        {name: 'reqFeatureIndex', type: 'USHORT', value: 0xffff},
-                                        {name: 'featureCount', type: 'USHORT', value: 2},
-                                        {name: 'featureIndex_0', type: 'USHORT', value: 0},
-                                        {name: 'featureIndex_1', type: 'USHORT', value: 1}
-                                    ]
-                                }
-                            },
-                            {name: 'langSysCount', type: 'USHORT', value: 0}
+                                {
+                                    name: 'defaultLangSys', type: 'TABLE', value: {
+                                        fields: [
+                                            {name: 'lookupOrder', type: 'USHORT', value: 0},
+                                            {name: 'reqFeatureIndex', type: 'USHORT', value: 0xffff},
+                                            {name: 'featureCount', type: 'USHORT', value: 2},
+                                            {name: 'featureIndex_0', type: 'USHORT', value: 0},
+                                            {name: 'featureIndex_1', type: 'USHORT', value: 1}
+                                        ]
+                                    }
+                                },
+                                {name: 'langSysCount', type: 'USHORT', value: 0}
                             ]
                         }
                     }
@@ -609,17 +611,17 @@ describe('types.mjs', function() {
         assert.equal(e([1]), '00 01');
         assert.equal(e([1, 2, 3, 127, -128, -1, -2]), '06 01 02 03 7F 80 FF FE');
         assert.equal(e(new Array(64).fill(127)),
-                     '3F ' + (new Array(64).fill('7F')).join(' '));
+            '3F ' + (new Array(64).fill('7F')).join(' '));
         assert.equal(e(new Array(65).fill(127)),
-                     '3F ' + (new Array(64).fill('7F')).join(' ') + ' 00 7F');
+            '3F ' + (new Array(64).fill('7F')).join(' ') + ' 00 7F');
 
         // words
         assert.equal(e([0x6666]), '40 66 66');
         assert.equal(e([0x6666, 32767, -1, -32768]), '43 66 66 7F FF FF FF 80 00');
         assert.equal(e(new Array(64).fill(0x1122)),
-                     '7F ' + (new Array(64).fill('11 22')).join(' '));
+            '7F ' + (new Array(64).fill('11 22')).join(' '));
         assert.equal(e(new Array(65).fill(0x1122)),
-                     '7F ' + (new Array(64).fill('11 22')).join(' ') + ' 40 11 22');
+            '7F ' + (new Array(64).fill('11 22')).join(' ') + ' 40 11 22');
 
         // bytes, zeroes
         assert.equal(e([1, 0]), '01 01 00');
