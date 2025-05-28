@@ -1,8 +1,8 @@
 import assert from 'assert';
 import Font from '../../src/font.mjs';
-import name from '../../src/tables/name.mjs';
 import sfnt from '../../src/tables/sfnt.mjs';
-import { encode } from '../../src/types.mjs';
+import { encode } from '../../src/fn/encode.mjs';
+import { parseNameTable } from '../../src/fn/parse-name-table.mjs';
 
 function encodeAndParseTable(table, parser) {
     const bytes = encode.TABLE(table);
@@ -25,23 +25,23 @@ describe('tables/sfnt.mjs', function () {
     };
 
     describe('fontToSfntTable', function () {
-        beforeEach(function() {
-            font = new Font({...defaultFont});
+        beforeEach(function () {
+            font = new Font({ ...defaultFont });
         });
 
-        it('should create an sfnt table object', ()=>{
+        it('should create an sfnt table object', () => {
             const sfnt_table = sfnt.fontToTable(font);
             assert.ok(sfnt_table);
             assert.equal(sfnt_table.tableName, 'sfnt');
         });
 
-        it('should set default values when no name values are set', ()=>{
+        it('should set default values when no name values are set', () => {
             const sfnt_table = sfnt.fontToTable(font);
-            const name_table = sfnt_table.tables.find((table)=>table.tableName == 'name');
+            const name_table = sfnt_table.tables.find((table) => table.tableName == 'name');
 
             assert.ok(name_table);
-            
-            const parsedNameTable = encodeAndParseTable(name_table, name.parse);
+
+            const parsedNameTable = encodeAndParseTable(name_table, parseNameTable);
 
             assert.deepEqual(parsedNameTable, {
                 macintosh: {
@@ -85,7 +85,7 @@ describe('tables/sfnt.mjs', function () {
             });
         });
 
-        it('should set values in the names table with the values of the font object\'s names property', ()=>{
+        it('should set values in the names table with the values of the font object\'s names property', () => {
             const fontFamily = 'Original Name';
             const fontSubfamily = 'Bold Italic';
             const fullName = 'Original Name Bold Italic';
@@ -96,30 +96,30 @@ describe('tables/sfnt.mjs', function () {
             font.names = {
                 macintosh: {
                     fontFamily: { en: fontFamily },
-                    fontSubfamily: { en: fontSubfamily},
+                    fontSubfamily: { en: fontSubfamily },
                     fullName: { en: fullName },
                     version: { en: version },
                     preferredFamily: { en: preferredFamily },
-                    preferredSubfamily: { en: preferredSubfamily}
+                    preferredSubfamily: { en: preferredSubfamily }
                 },
                 windows: {
                     fontFamily: { en: fontFamily },
-                    fontSubfamily: { en: fontSubfamily},
+                    fontSubfamily: { en: fontSubfamily },
                     fullName: { en: fullName },
                     version: { en: version },
                     preferredFamily: { en: preferredFamily },
-                    preferredSubfamily: { en: preferredSubfamily}
+                    preferredSubfamily: { en: preferredSubfamily }
                 }
             };
 
             const sfnt_table = sfnt.fontToTable(font);
-            const name_table = sfnt_table.tables.find((table)=>table.tableName == 'name');
-            const parsedNameTable = encodeAndParseTable(name_table, name.parse);
+            const name_table = sfnt_table.tables.find((table) => table.tableName == 'name');
+            const parsedNameTable = encodeAndParseTable(name_table, parseNameTable);
 
             assert.deepEqual(parsedNameTable, {
                 macintosh: {
                     fontFamily: { en: fontFamily },
-                    fontSubfamily: { en: fontSubfamily},
+                    fontSubfamily: { en: fontSubfamily },
                     fullName: { en: fullName },
                     version: { en: version },
                     preferredFamily: { en: preferredFamily },
@@ -129,31 +129,32 @@ describe('tables/sfnt.mjs', function () {
                 },
                 windows: {
                     fontFamily: { en: fontFamily },
-                    fontSubfamily: { en: fontSubfamily},
+                    fontSubfamily: { en: fontSubfamily },
                     fullName: { en: fullName },
                     version: { en: version },
                     preferredFamily: { en: preferredFamily },
-                    preferredSubfamily: { en: preferredSubfamily},
+                    preferredSubfamily: { en: preferredSubfamily },
                     postScriptName: { en: `${fontFamily.replaceAll(' ', '')}-${fontSubfamily}` },
                     uniqueID: { en: `: ${fontFamily} ${fontSubfamily}` },
                 }
             });
         });
 
-        it('should set preferredSubfamily as value of fontSubfamily, if not explicitly set', ()=>{
+        it('should set preferredSubfamily as value of fontSubfamily, if not explicitly set', () => {
             const preferredSubfamily = 'Custom Subfamily';
-            font.names = { macintosh: {
-                fontFamily: {en: defaultFont.familyName },
-                fontSubfamily: { en: preferredSubfamily }
-            }};
+            font.names = {
+                macintosh: {
+                    fontFamily: { en: defaultFont.familyName },
+                    fontSubfamily: { en: preferredSubfamily }
+                }
+            };
 
             const sfnt_table = sfnt.fontToTable(font);
-            const name_table = sfnt_table.tables.find((table)=>table.tableName == 'name');
-            const parsedNameTable = encodeAndParseTable(name_table, name.parse);
+            const name_table = sfnt_table.tables.find((table) => table.tableName == 'name');
+            const parsedNameTable = encodeAndParseTable(name_table, parseNameTable);
 
             assert.deepEqual(parsedNameTable.macintosh.preferredSubfamily, { en: preferredSubfamily });
             assert.deepEqual(parsedNameTable.windows.preferredSubfamily, { en: preferredSubfamily });
         });
     });
 });
-

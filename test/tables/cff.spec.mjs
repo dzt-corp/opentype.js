@@ -5,6 +5,7 @@ import glyphset from '../../src/glyphset.mjs';
 import Path from '../../src/path.mjs';
 import cff from '../../src/tables/cff.mjs';
 import { parse } from '../../src/opentype.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 import { readFileSync } from 'fs';
 const loadSync = (url, opt) => parse(readFileSync(url), opt);
 
@@ -41,7 +42,7 @@ describe('tables/cff.mjs', function () {
         const glyphSetFont = { unitsPerEm: 8 };
         const glyphs = new glyphset.GlyphSet(glyphSetFont, [nodefGlyph, bumpsGlyph]);
 
-        assert.deepEqual(data, hex(cff.make(glyphs, options).encode()));
+        assert.deepEqual(data, hex(encode.TABLE(cff.make(glyphs, options))));
     });
 
     /**

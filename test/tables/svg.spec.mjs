@@ -3,6 +3,7 @@ import svg from '../../src/tables/svg.mjs';
 import { readFileSync } from 'fs';
 import { parse } from '../../src/opentype.mjs';
 import { decodeSvgDocument } from '../../src/svgimages.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 const loadSync = (url, opt) => parse(readFileSync(url), opt);
 
 /** @typedef {import('../src/tables/svg.mjs').SVGTable} SVGTable */
@@ -42,7 +43,7 @@ describe('tables/svg.mjs', function () {
 
     it('can make SVG table', () => {
         for (const svgTable of svgTables) {
-            const bytes = new Uint8Array(svg.make(svgTable).encode());
+            const bytes = new Uint8Array(encode.TABLE(svg.make(svgTable)));
             const data = new DataView(bytes.buffer);
             assert.deepStrictEqual(svg.parse(data, bytes.byteOffset), svgTable);
         }

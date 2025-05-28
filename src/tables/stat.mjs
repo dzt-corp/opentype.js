@@ -4,6 +4,7 @@
 import check from '../check.mjs';
 import { default as parse, Parser } from '../parse.mjs';
 import table from '../table.mjs';
+import { sizeOf } from '../fn/size-of.mjs';
 
 const axisRecordStruct = {
     tag: Parser.tag,
@@ -217,11 +218,11 @@ function makeSTATTable(STAT) {
         {name: 'elidedFallbackNameID', type: 'USHORT', value: STAT.elidedFallbackNameID},
     ]);
 
-    result.designAxesOffset = result.offsetToAxisValueOffsets = result.sizeOf();
+    result.designAxesOffset = result.offsetToAxisValueOffsets = sizeOf.TABLE(result);
 
     for (let i = 0; i < STAT.axes.length; i++) {
         const axisRecord = makeSTATAxisRecord(i, STAT.axes[i]);
-        result.offsetToAxisValueOffsets += axisRecord.sizeOf();
+        result.offsetToAxisValueOffsets += sizeOf.TABLE(axisRecord);
         result.fields = result.fields.concat(axisRecord.fields);
     }
 
@@ -236,7 +237,7 @@ function makeSTATTable(STAT) {
             type: 'USHORT',
             value: axisValueTableOffset
         });
-        axisValueTableOffset += axisValueTable.sizeOf();
+        axisValueTableOffset += sizeOf.TABLE(axisValueTable);
         axisValueTables = axisValueTables.concat(axisValueTable.fields);
     }
 

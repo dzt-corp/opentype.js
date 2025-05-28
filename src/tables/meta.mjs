@@ -2,7 +2,7 @@
 // https://www.microsoft.com/typography/OTSPEC/gpos.htm
 
 import check from '../check.mjs';
-import { decode } from '../types.mjs';
+import { decode } from '../fn/decode.mjs';
 import parse from '../parse.mjs';
 import table from '../table.mjs';
 

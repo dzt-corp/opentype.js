@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { hex, unhex } from '../testutil.mjs';
 import STAT from '../../src/tables/stat.mjs';
+import { encode } from '../../src/fn/encode.mjs';
 
 describe('tables/stat.mjs', function() {
     // Style Attributes Header, v1.2
@@ -63,7 +64,7 @@ describe('tables/stat.mjs', function() {
     it('can make a font variations table', function() {
         table.version[1] = 2;
         table.elidedFallbackNameID = 4848;
-        const encodedTable = STAT.make(table).encode();
+        const encodedTable = encode.TABLE(STAT.make(table));
         assert.deepEqual(hex(encodedTable), h12 + ' ' + data);
     });
 });

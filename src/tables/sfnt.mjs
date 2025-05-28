@@ -9,25 +9,33 @@ import table from '../table.mjs';
 
 import cmap from './cmap.mjs';
 import cff from './cff.mjs';
-import head from './head.mjs';
 import hhea from './hhea.mjs';
 import hmtx from './hmtx.mjs';
 import ltag from './ltag.mjs';
 import maxp from './maxp.mjs';
-import _name from './name.mjs';
-import os2 from './os2.mjs';
-import post from './post.mjs';
 import gsub from './gsub.mjs';
 import meta from './meta.mjs';
 import colr from './colr.mjs';
 import cpal from './cpal.mjs';
-import fvar from './fvar.mjs';
 import stat from './stat.mjs';
 import avar from './avar.mjs';
 import cvar from './cvar.mjs';
 import gvar from './gvar.mjs';
 import gasp from './gasp.mjs';
 import svg from './svg.mjs';
+import {
+    encode,
+    getUnicodeRange,
+    makeFvarTable,
+    makeNameTable,
+    makeOS2Table,
+    makePostTable,
+    parseFvarTable,
+    sizeOf,
+} from '../fn/index.mjs';
+import { makeHeadTable } from '../fn/make-head-table.mjs';
+
+const fvar = { parse: parseFvarTable, make: makeFvarTable };
 
 function log2(v) {
     return Math.log(v) / Math.log(2) | 0;
@@ -52,20 +60,20 @@ function computeCheckSum(bytes) {
 
 function makeTableRecord(tag, checkSum, offset, length) {
     return new table.Record('Table Record', [
-        {name: 'tag', type: 'TAG', value: tag !== undefined ? tag : ''},
-        {name: 'checkSum', type: 'ULONG', value: checkSum !== undefined ? checkSum : 0},
-        {name: 'offset', type: 'ULONG', value: offset !== undefined ? offset : 0},
-        {name: 'length', type: 'ULONG', value: length !== undefined ? length : 0}
+        { name: 'tag', type: 'TAG', value: tag !== undefined ? tag : '' },
+        { name: 'checkSum', type: 'ULONG', value: checkSum !== undefined ? checkSum : 0 },
+        { name: 'offset', type: 'ULONG', value: offset !== undefined ? offset : 0 },
+        { name: 'length', type: 'ULONG', value: length !== undefined ? length : 0 }
     ]);
 }
 
 function makeSfntTable(tables) {
     const sfnt = new table.Table('sfnt', [
-        {name: 'version', type: 'TAG', value: 'OTTO'},
-        {name: 'numTables', type: 'USHORT', value: 0},
-        {name: 'searchRange', type: 'USHORT', value: 0},
-        {name: 'entrySelector', type: 'USHORT', value: 0},
-        {name: 'rangeShift', type: 'USHORT', value: 0}
+        { name: 'version', type: 'TAG', value: 'OTTO' },
+        { name: 'numTables', type: 'USHORT', value: 0 },
+        { name: 'searchRange', type: 'USHORT', value: 0 },
+        { name: 'entrySelector', type: 'USHORT', value: 0 },
+        { name: 'rangeShift', type: 'USHORT', value: 0 }
     ]);
     sfnt.tables = tables;
     sfnt.numTables = tables.length;
@@ -77,29 +85,29 @@ function makeSfntTable(tables) {
     const recordFields = [];
     const tableFields = [];
 
-    let offset = sfnt.sizeOf() + (makeTableRecord().sizeOf() * sfnt.numTables);
+    let offset = sizeOf.TABLE(sfnt) + (sizeOf.TABLE(makeTableRecord()) * sfnt.numTables);
     while (offset % 4 !== 0) {
         offset += 1;
-        tableFields.push({name: 'padding', type: 'BYTE', value: 0});
+        tableFields.push({ name: 'padding', type: 'BYTE', value: 0 });
     }
 
     for (let i = 0; i < tables.length; i += 1) {
         const t = tables[i];
         check.argument(t.tableName.length === 4, 'Table name' + t.tableName + ' is invalid.');
-        const tableLength = t.sizeOf();
-        const tableRecord = makeTableRecord(t.tableName, computeCheckSum(t.encode()), offset, tableLength);
-        recordFields.push({name: tableRecord.tag + ' Table Record', type: 'RECORD', value: tableRecord});
-        tableFields.push({name: t.tableName + ' table', type: 'RECORD', value: t});
+        const tableLength = sizeOf.TABLE(t);
+        const tableRecord = makeTableRecord(t.tableName, computeCheckSum(encode.TABLE(t)), offset, tableLength);
+        recordFields.push({ name: tableRecord.tag + ' Table Record', type: 'RECORD', value: tableRecord });
+        tableFields.push({ name: t.tableName + ' table', type: 'RECORD', value: t });
         offset += tableLength;
         check.argument(!isNaN(offset), 'Something went wrong calculating the offset.');
         while (offset % 4 !== 0) {
             offset += 1;
-            tableFields.push({name: 'padding', type: 'BYTE', value: 0});
+            tableFields.push({ name: 'padding', type: 'BYTE', value: 0 });
         }
     }
 
     // Table records need to be sorted alphabetically.
-    recordFields.sort(function(r1, r2) {
+    recordFields.sort(function (r1, r2) {
         if (r1.value.tag > r2.value.tag) {
             return 1;
         } else {
@@ -172,7 +180,7 @@ function fontToSfntTable(font) {
             lastCharIndex = unicode;
         }
 
-        const position = os2.getUnicodeRange(unicode);
+        const position = getUnicodeRange(unicode);
         if (position < 32) {
             ulUnicodeRange1 |= 1 << position;
         } else if (position < 64) {
@@ -217,9 +225,9 @@ function fontToSfntTable(font) {
     }
     if (font.italicAngle < 0) {
         macStyle |= font.macStyleValues.ITALIC;
-    } 
+    }
 
-    const headTable = head.make({
+    const headTable = makeHeadTable({
         flags: 3, // 00000011 (baseline for font at y=0; left sidebearing point at x=0)
         unitsPerEm: font.unitsPerEm,
         xMin: globals.xMin,
@@ -243,7 +251,7 @@ function fontToSfntTable(font) {
 
     const maxpTable = maxp.make(font.glyphs.length);
 
-    const os2Table = os2.make(Object.assign({
+    const os2Table = makeOS2Table(Object.assign({
         xAvgCharWidth: Math.round(globals.advanceWidthAvg),
         usFirstCharIndex: firstCharIndex,
         usLastCharIndex: lastCharIndex,
@@ -261,7 +269,7 @@ function fontToSfntTable(font) {
         usWinAscent: globals.yMax,
         usWinDescent: Math.abs(globals.yMin),
         ulCodePageRange1: 1, // FIXME: hard-code Latin 1 support for now
-        sxHeight: metricsForChar(font, 'xyvw', {yMax: Math.round(globals.ascender / 2)}).yMax,
+        sxHeight: metricsForChar(font, 'xyvw', { yMax: Math.round(globals.ascender / 2) }).yMax,
         sCapHeight: metricsForChar(font, 'HIKLEFJMNTZBDPRAGOQSUVWXY', globals).yMax,
         usDefaultChar: font.hasChar(' ') ? 32 : 0, // Use space as the default character, if available.
         usBreakChar: font.hasChar(' ') ? 32 : 0, // Use space as the break character, if available.
@@ -302,7 +310,7 @@ function fontToSfntTable(font) {
         }
 
         if (!names[platform].postScriptName) {
-            names[platform].postScriptName = {en: postScriptName};
+            names[platform].postScriptName = { en: postScriptName };
         }
     }
 
@@ -332,10 +340,10 @@ function fontToSfntTable(font) {
     }
 
     const languageTags = [];
-    const nameTable = _name.make(names, languageTags);
+    const nameTable = makeNameTable(names, languageTags);
     const ltagTable = (languageTags.length > 0 ? ltag.make(languageTags) : undefined);
 
-    const postTable = post.make(font);
+    const postTable = makePostTable(font);
     const cffTable = cff.make(font.glyphs, {
         version: font.getEnglishName('version'),
         fullName: englishFullName,
@@ -363,7 +371,7 @@ function fontToSfntTable(font) {
         stat,
         avar,
         cvar,
-        fvar, 
+        fvar,
         gvar,
         gasp,
         svg,
@@ -391,7 +399,7 @@ function fontToSfntTable(font) {
     const sfntTable = makeSfntTable(tables);
 
     // Compute the font's checkSum and store it in head.checkSumAdjustment.
-    const bytes = sfntTable.encode();
+    const bytes = encode.TABLE(sfntTable);
     const checkSum = computeCheckSum(bytes);
     const tableFields = sfntTable.fields;
     let checkSumAdjusted = false;
