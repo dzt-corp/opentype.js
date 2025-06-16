@@ -3,12 +3,19 @@
 // http://download.microsoft.com/download/8/0/1/801a191c-029d-4af3-9642-555f6fe514ee/cff.pdf
 // http://download.microsoft.com/download/8/0/1/801a191c-029d-4af3-9642-555f6fe514ee/type2.pdf
 
-import { CffEncoding, cffStandardEncoding, cffExpertEncoding, cffStandardStrings } from '../encoding.js';
+import { 
+    CffEncoding, 
+    cffStandardEncoding, 
+    cffExpertEncoding, 
+    cffStandardStrings, 
+    cffISOAdobeStrings,
+    cffIExpertStrings,
+    cffExpertSubsetStrings } from '../encoding.js';
 import glyphset from '../glyphset.js';
 import parse from '../parse.js';
 import Path from '../path.js';
 import table from '../table.js';
-import head from './head.js';
+
 
 // Custom equals function that can also check lists.
 function equals(a, b) {
@@ -1121,29 +1128,65 @@ function parseCFFTable(data, start, font, opt) {
             font.subrsBias = 0;
         }
     }
+    if (header.formatMajor < 2) {
+        const privateDictOffset = start + topDict.private[1];
+        const privateDict = parseCFFPrivateDict(data, privateDictOffset, topDict.private[0], stringIndex.objects, header.formatMajor);
+        font.defaultWidthX = privateDict.defaultWidthX;
+        font.nominalWidthX = privateDict.nominalWidthX;
+
+        if (privateDict.subrs !== 0) {
+            const subrOffset = privateDictOffset + privateDict.subrs;
+            const subrIndex = parseCFFIndex(data, subrOffset);
+            font.subrs = subrIndex.objects;
+            font.subrsBias = calcCFFSubroutineBias(font.subrs);
+        } else {
+            font.subrs = [];
+            font.subrsBias = 0;
+        }
+    }
 
     // Offsets in the top dict are relative to the beginning of the CFF data, so add the CFF start offset.
-    // @TODO: support lowMemory mode for CFF2
     let charStringsIndex;
     if (opt.lowMemory) {
         charStringsIndex = parseCFFIndexLowMemory(data, start + topDict.charStrings, header.formatMajor);
-        font.nGlyphs = charStringsIndex.offsets.length;
+        font.nGlyphs = charStringsIndex.offsets.length - 1; // number of elements is count + 1
     } else {
         charStringsIndex = parseCFFIndex(data, start + topDict.charStrings, null, header.formatMajor);
         font.nGlyphs = charStringsIndex.objects.length;
     }
 
+    if ( header.formatMajor > 1 && font.tables.maxp && font.nGlyphs !== font.tables.maxp.numGlyphs ) {
+        console.error(`Glyph count in the CFF2 table (${font.nGlyphs}) must correspond to the glyph count in the maxp table (${font.tables.maxp.numGlyphs})`);
+    }
+
     if (header.formatMajor < 2) {
-        const charset = parseCFFCharset(data, start + topDict.charset, font.nGlyphs, stringIndex.objects);
+        let charset = [];
+        let encoding = [];
+
+        if(topDict.charset === 0) {
+            charset = cffISOAdobeStrings;
+        } else if(topDict.charset === 1) {
+            charset = cffIExpertStrings;
+        } else if (topDict.charset === 2) {
+            charset = cffExpertSubsetStrings;
+        } else {
+            charset = parseCFFCharset(data, start + topDict.charset, font.nGlyphs, stringIndex.objects, font.isCIDFont);
+        }
+
         if (topDict.encoding === 0) {
             // Standard encoding
-            font.cffEncoding = new CffEncoding(cffStandardEncoding, charset);
+            encoding = cffStandardEncoding;
         } else if (topDict.encoding === 1) {
             // Expert encoding
-            font.cffEncoding = new CffEncoding(cffExpertEncoding, charset);
+            encoding = cffExpertEncoding;
         } else {
-            font.cffEncoding = parseCFFEncoding(data, start + topDict.encoding, charset);
+            encoding = parseCFFEncoding(data, start + topDict.encoding);
         }
+        
+        font.cffEncoding = new CffEncoding(encoding, charset);
+
+        // Prefer the CMAP encoding to the CFF encoding.
+        font.encoding = font.encoding || font.cffEncoding;
     }
 
     // Prefer the CMAP encoding to the CFF encoding.
