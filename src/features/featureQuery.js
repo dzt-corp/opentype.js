@@ -163,7 +163,7 @@ function chainingSubstitutionFormat3(contextParams, subtable) {
                     lookup = this.getLookupMethod(lookupTable, subtable);
                 }
 
-                if (substitutionType === '12') {
+                if (substitutionType === '12' || substitutionType === "11" || substitutionType === "41" ) {
                     for (let n = 0; n < inputLookups.length; n++) {
                         const glyphIndex = contextParams.get(n);
                         const substitution = lookup(glyphIndex);
@@ -407,6 +407,8 @@ FeatureQuery.prototype.getLookupMethod = function(lookupTable, subtable) {
             return contextParams => chainingSubstitutionFormat3.apply(
                 this, [contextParams, subtable]
             );
+        case '61':
+        case '62':    
         case '41':
             return contextParams => ligatureSubstitutionFormat1.apply(
                 this, [contextParams, subtable]
@@ -508,6 +510,22 @@ FeatureQuery.prototype.lookupFeature = function (query) {
                         }));
                     }
                     break;
+                case '61':
+                    substitution = lookup(contextParams);
+                    if (Array.isArray(substitution) && substitution.length) {
+                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
+                            id: 61, tag: query.tag, substitution
+                        }));
+                    }
+                    break;
+                case '62':
+                    substitution = lookup(contextParams);
+                    if (Array.isArray(substitution) && substitution.length) {
+                        substitutions.splice(currentIndex, 1, new SubstitutionAction({
+                            id: 62, tag: query.tag, substitution
+                        }));
+                    }
+                    break;    
                 case '63':
                     substitution = lookup(contextParams);
                     if (Array.isArray(substitution) && substitution.length) {
