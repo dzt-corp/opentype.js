@@ -1,7 +1,8 @@
 {
   "name": "@dztcorp/opentype.js",
-   "version": "1.0.20",
+   "version": "1.0.22",
   "description": "OpenType font parser",
+  "type": "module",
   "author": {
     "name": "Frederik De Bleser",
     "email": "frederik@debleser.be"
